@@ -1,12 +1,22 @@
 require("dotenv").config(".env");
-httpProxy = require("http-proxy");
-console.log(process.env.PORT);
+const express = require('express');
+const cors = require('cors');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
-try {
-  console.log("Starting proxy server on "+process.env.PROXY_URL+" on port " + process.env.PORT);
-  httpProxy.createProxyServer({ target: process.env.PROXY_URL, changeOrigin: true  }).listen(process.env.PORT);
-  console.log("Started proxy server on port " + process.env.PORT);
-} catch (e) {
-  console.log("Error starting proxy server on port " + process.env.PORT);
-  console.log(e);
-}
+const app = express();
+
+app.use(cors()) ;
+
+// Proxy configuration
+const proxyOptions = {
+  target: process.env.PROXY_URL,
+  changeOrigin: true,
+};
+
+// Create the proxy middleware with CORS configuration
+app.use("/", createProxyMiddleware(proxyOptions));
+
+// Start your server
+app.listen(process.env.PORT, () => {
+  console.log('Proxy server listening on port '+ process.env.PORT);
+});
